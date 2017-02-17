@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>运动</title>
+  <link rel="stylesheet" type="text/css" href="css/demo.css">
+  <script type="text/javascript" src="js/demo.js"></script>
+   <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+</head>
+<body>
+  <div id="box">
+      <span class="btn">></span>
+  </div>
+  <script>
+/**
+ * 使用offsetLeft,需注意margin的使用
+ * offsetLeft = margin-left + left;
+ * offsetWidth= padding + border + width;
+ *
+ * @author Lonve
+ */
+function getStyle(elem,attr){
+    var result = null;
+    result = elem.currentStyle?elem.currentStyle[attr]:getComputedStyle(elem,false)[attr];
+    if(attr=="opacity"){
+        return parseInt(parseFloat(result)*100);
+    }
+    return parseInt(result);
+}
+
+
+var timer = null;
+//匀速运动停止条件--->距离足够近
+function offsetMove1(offset){
+    var oDiv = document.getElementById("oDiv");
+    var speed = 0;
+    speed = oDiv.offsetLeft < offset?10:-10;
+
+    clearInterval(timer);
+    timer = setInterval(function(){
+        if(oDiv.offsetLeft >= offset){ //Math.abs(oDiv.offsetLeft - offset)<speed;
+            clearInterval(timer);
+        }else{
+            oDiv.style.left = oDiv.offsetLeft + speed + "px";
+        }
+    },30)
+}
+
+//缓动运动条件 1.变化的运动速度,最后速度为零
+//问题:offsetLeft
+function offsetMove2(elem,offset){
+    clearInterval(elem.timer);
+    var speed = 0;
+    elem.timer = setInterval(function(){
+        speed = (offset - elem.offsetLeft)/8;
+        speed = speed>0?Math.ceil(speed):Math.floor(speed);
+
+        //是否到达到目标点
+        if(elem.offsetLeft == offset){
+            clearInterval(elem.timer);
+        }else{
+            elem.style.left = elem.offsetLeft + speed + "px";
+        }
+    },30)
+}
+
+//任意属性值
+//避免小数值    parseInt(0.3*100)
+function offsetMove3(elem,attr,offset){
+    clearInterval(elem.timer);
+    elem.timer = setInterval(function(){
+        var curAttr = getStyle(elem,attr);            //当前属性值
+        var speed = (offset - curAttr)/8;            //当前速度
+        speed = speed>0?Math.ceil(speed):Math.floor(speed);
+
+        if(offset == curAttr){
+            clearInterval(elem.timer);
+        }else{
+            if(attr=="opacity"){
+                elem.style.filter = "alpha(opacity="+(curAttr +speed)+")";
+                elem.style.opacity= (curAttr + speed)/100;
+            }else{
+                elem.style[attr] = (curAttr + speed) + "px";
+            }
+        }
+    },30)
+}
+
+//链式运动
+function offsetMove4(elem,attr,offset,fn){
+    clearInterval(elem.timer);
+    elem.timer = setInterval(function(){
+        var curAttr = getStyle(elem,attr);
+        var speed   = (offset - curAttr)/8;
+        speed = speed > 0? Math.ceil(speed):Math.floor(speed);
+
+        if(offset == curAttr){
+            clearInterval(elem.timer);
+            if(fn){ fn(); }
+        }else{
+            if(attr=="opacity"){
+                elem.style.filter = "alpha(opacity:"+(curAttr+speed)+")";
+                elem.style.opacity= (curAttr+speed)/100;
+            }else{
+                elem.style[attr] = curAttr + speed + "px";
+            }
+        }
+    },30)
+}
+
+//多个属性同时变化
+function offsetMove5(elem,json,fn){
+    var isStop = true;            //所有值都到达
+    clearInterval(elem.timer);
+    elem.timer = setInterval(function(){
+        //历遍json属性
+        for(var attr in json){
+            //1.取当前与速度
+            var offset  = json[attr];
+            var curAttr = getStyle(elem,attr);
+            var speed   = (offset - curAttr)/8;
+            speed = speed > 0? Math.ceil(speed):Math.floor(speed);
+
+            //2.检测停止
+            if(offset!=curAttr){
+                isStop = false;
+            }
+            if(attr=="opacity"){
+                elem.style.filter = "alpha(opacity:"+(curAttr+speed)+")";
+                elem.style.opacity= (curAttr+speed)/100;
+            }else{
+                elem.style[attr] = curAttr + speed + "px";
+            }
+        }
+        //所有值都到达目标值,则停止
+        if(isStop){
+            clearInterval(elem.timer);
+            if(fn){ fn(); }
+        }
+    },30);
+}
+  </script>
+</body>
+</html>
