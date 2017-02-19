@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>轮播图</title>
+  <link rel="stylesheet" type="text/css" href="css/demo.css">
+</head>
+<body>
+  <div id="container">
+  <!-- 图片列表开始 -->
+    <div id="list">
+      <ul>
+        <li><img src="" alt=""></li>
+        ...
+      </ul>
+    </div>
+  <!-- 图片列表结束 -->
+
+  <!-- 底部按钮开始 -->
+    <div id="buttons">
+      <span class="on"></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  <!-- 底部按钮结束 -->
+
+  <!-- 左右按钮开始 -->
+    <a href="javascript:;" id="next" class="arrow btn1">&gt;</a>
+    <a href="javascript:;" id="prev" class="arrow btn2">&lt;</a>
+  <!-- 左右按钮结束 -->
+  </div>
+  <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+  <script type="text/javascript">
+
+  var i=0,timer=null;
+
+$(function(){
+
+  showTime();
+
+  $("#buttons span").hover(function(){
+
+    clearInterval(timer);
+
+    i=$(this).index();
+
+    show();
+
+  },function(){
+
+    showTime();
+
+  });//主函数
+
+//解决轮换时候点击的bug;
+
+$(".arrow").bind({
+
+  "mousemove":function()
+  {
+    clearInterval(timer);
+  },
+  "mouseout":function()
+  {
+    showTime();
+  }
+
+});
+
+
+$("#next").click(function(){
+
+  if(i==4){
+
+    i=-1;
+
+  };
+
+  i++;
+
+  show();
+
+  console.log(i);
+
+  });// 右点击轮换结束
+
+ $("#prev").click(function(){
+
+  clearInterval(timer);
+
+  if(i==0){
+
+    i=5;
+
+  };
+
+  i--;
+
+  show();
+
+  });// 左点击轮换结束
+
+});
+
+function showTime(){
+
+  timer=setInterval(function(){
+
+    i++;
+
+    if(i==5){
+
+      i=0;
+
+    };
+
+    show();
+
+  },2000)
+
+};
+
+function show(){
+
+  $("#list li").eq(i).fadeIn(300).siblings().fadeOut(300);
+
+  $("#buttons span").eq(i).addClass('on').siblings().removeClass('on');
+
+};
+  </script>
+</body>
+</html>
